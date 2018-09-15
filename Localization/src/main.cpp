@@ -1,6 +1,6 @@
 
 #include "DeadReckoner.h"
-#include "quadenc.h"
+#include "QuadEnc.h"
 
 // ENCODER PINS
 #define ENCODER_LEFTA_PIN 2
@@ -57,7 +57,7 @@ void setup()
 
   Ql.begin(leftPulseA, leftPulseB);
   Qr.begin(rightPulseA, rightPulseB);
-  Serial.begin(115200); 
+  Serial.begin(115200);
 
 }
 

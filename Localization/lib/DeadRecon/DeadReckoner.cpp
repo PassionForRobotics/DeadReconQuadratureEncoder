@@ -4,77 +4,85 @@
 
 #define UNSIGNED_LONG_MAX 4294967295
 
-DeadReckoner::DeadReckoner(volatile long long int *left, volatile long long int *right, double tpr, double r, double l) {
-	leftTicks = left;
-	rightTicks = right;
-	ticksPerRev = tpr;
-	radius = r;
-	length = l;
+DeadReckoner::DeadReckoner(volatile long long int *_left, volatile long long int *_right, double _tpr, double _r, double _l)
+{
+	this->left_ticks_ = _left;
+	this->right_ticks_ = _right;
+	this->ticks_per_rev_ = _tpr;
+	this->radius_ = _r;
+	this->length_ = _l;
 }
 
-double DeadReckoner::getX() {
-	return xc;
+double DeadReckoner::getX()
+{
+	return this->xc_;
 }
 
-double DeadReckoner::getY() {
-	return yc;
+double DeadReckoner::getY()
+{
+	return this->yc_;
 }
 
-double DeadReckoner::getWl() {
-	return wl;
+double DeadReckoner::getWl()
+{
+	return this->wl_;
 }
 
-double DeadReckoner::getWr() {
-	return wr;
+double DeadReckoner::getWr()
+{
+	return this->wr_;
 }
 
-double DeadReckoner::getTheta() {
-	return theta;
+double DeadReckoner::getTheta()
+{
+	return this->theta_;
 }
 
-void DeadReckoner::computeAngularVelocities() {
+void DeadReckoner::computeAngularVelocities()
+{
 	// Time elapsed after computing the angular velocity previously.
-	unsigned long dt_omega = micros() - prevWheelComputeTime; // in microseconds
+	unsigned long dt_omega = micros() - this->prev_wheel_compute_time_; // in microseconds
 	if (dt_omega < 0) {
 		// micros() has overflowed and reset to 0
-		dt_omega = UNSIGNED_LONG_MAX - prevWheelComputeTime + micros();
+		dt_omega = UNSIGNED_LONG_MAX - this->prev_wheel_compute_time_ + micros();
 	}
 
-	float c = 2 * PI / (ticksPerRev * dt_omega / 1000000.0); // ticks to rad/s conversion factor
-	wl = (*leftTicks - leftTicksPrev) * c;
-	wr = (*rightTicks - rightTicksPrev) * c;
-	
-	leftTicksPrev = *leftTicks;
-	rightTicksPrev = *rightTicks;
+	float c = 2 * PI / (this->ticks_per_rev_ * dt_omega / 1000000.0); // ticks to rad/s conversion factor
+	this->wl_ = (*this->left_ticks_ - this->left_ticks_prev_) * c;
+	this->wr_ = (*this->right_ticks_ - this->right_ticks_prev_) * c;
 
-	prevWheelComputeTime = micros();
+	this->left_ticks_prev_ = *this->left_ticks_;
+	this->right_ticks_prev_ = *this->right_ticks_;
+
+	this->prev_wheel_compute_time_ = micros();
 }
 
-void DeadReckoner::computePosition() {
+void DeadReckoner::computePosition()
+{
 	computeAngularVelocities();
 	// Time elapsed after the previous position has been integrated.
-	unsigned long dt_integration = micros() - prevIntegrationTime;
+	unsigned long dt_integration = micros() - this->prev_integration_time_;
 	if (dt_integration < 0) {
 		// micros() has overflowed and has reset to 0
-		dt_integration = UNSIGNED_LONG_MAX - prevIntegrationTime + micros();
+		dt_integration = UNSIGNED_LONG_MAX - this->prev_integration_time_ + micros();
 	}
 
 	float dt = dt_integration / 1000000.0; // convert to seconds
 
 	// Dead reckoning equations
 
-	float Vl = wl * radius;
-	float Vr = wr * radius;
+	float Vl = this->wl_ * this->radius_;
+	float Vr = this->wr_ * this->radius_;
 	float v = (Vr + Vl) / 2.0;
-	float w = (Vr - Vl) / length;
+	float w = (Vr - Vl) / this->length_;
 	// Uses 4th order Runge-Kutta to integrate numerically to find position.
-	float xNext = xc + dt * v*(2 + cos(dt*w / 2))*cos(theta + dt * w / 2) / 3;
-	float yNext = yc + dt * v*(2 + cos(dt*w / 2))*sin(theta + dt * w / 2) / 3;
-	float thetaNext = theta + dt * w;
+	float xNext = this->xc_ + dt * v*(2 + cos(dt*w / 2))*cos(this->theta_ + dt * w / 2) / 3;
+	float yNext = this->yc_ + dt * v*(2 + cos(dt*w / 2))*sin(this->theta_ + dt * w / 2) / 3;
+	float thetaNext = this->theta_ + dt * w;
 
-	xc = xNext;
-	yc = yNext;
-	theta = thetaNext;
+	this->xc_ = xNext;
+	this->yc_ = yNext;
+	this->theta_ = thetaNext;
 
-	prevIntegrationTime = micros();
+	this->prev_integration_time_ = micros();
 }
