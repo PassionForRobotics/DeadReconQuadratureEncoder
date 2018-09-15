@@ -1,10 +1,13 @@
 
-#ifndef _DeadReckoner_h
-#define _DeadReckoner_h
+#ifndef DEAD_RECONER_H_
+#define DEAD_RECONER_H_
+
+// By https://github.com/jaean123/DeadReckoning-library
 
 #include <Arduino.h>
 
-class DeadReckoner {
+class DeadReckoner
+{
 
 public:
 	DeadReckoner(volatile long long int *, volatile long long int *, double, double, double);

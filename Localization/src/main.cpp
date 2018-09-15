@@ -20,12 +20,8 @@
 #define SEND_INTERVAL 100 // milliseconds
 
 // Previous times for computing elapsed time.
-unsigned long prevPositionComputeTime = 0, prevSendTime = 0;
-
-// Previous x and y coordinate.
-double prevX = 0, prevY = 0;
-
-
+unsigned long g_prev_position_compute_time = 0, g_prev_send_time = 0;
+  
 QuadEncoder Ql(ENCODER_LEFTA_PIN, ENCODER_LEFTB_PIN);
 QuadEncoder Qr(ENCODER_RIGHTA_PIN, ENCODER_RIGHTB_PIN);
 
@@ -62,14 +58,14 @@ void setup()
 }
 
 void loop() {
-	if (millis() - prevPositionComputeTime > POSITION_COMPUTE_INTERVAL) {
+	if (millis() - g_prev_position_compute_time > POSITION_COMPUTE_INTERVAL) {
 		// Computes the new angular velocities and uses that to compute the new position.
 		// The accuracy of the position estimate will increase with smaller time interval until a certain point.
 		deadReckoner.computePosition();
-		prevPositionComputeTime = millis();
+		g_prev_position_compute_time = millis();
 	}
 
-	if (millis() - prevSendTime > SEND_INTERVAL) {
+	if (millis() - g_prev_send_time > SEND_INTERVAL) {
 		// Cartesian coordinate of latest location estimate.
 		// Length unit correspond to the one specified under MEASUREMENTS.
 		double x = deadReckoner.getX();
@@ -94,6 +90,6 @@ void loop() {
 		Serial.print("\tdist: "); Serial.print(distance);  Serial.print(" mm | ");
     Serial.print((int32_t)*Ql.getPosition()); Serial.print(" ");
 		Serial.println((int32_t)*Qr.getPosition());
-		prevSendTime = millis();
+		g_prev_send_time = millis();
 	}
 }
