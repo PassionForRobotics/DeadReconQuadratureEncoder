@@ -1,7 +1,7 @@
 
 #include <Arduino.h>
 
-#include "quadenc.h"
+#include "QuadEnc.h"
 
 #include <DeadReckoner.h>
 
