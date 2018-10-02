@@ -1,16 +1,18 @@
 #include <Arduino.h>
 #include <DiffDrive.h>
-
-Motor::Motor(){}
-
-void Motor::begin(int _pin_A, int _pin_B)
+ 
+void Motor::begin(int _lr, int _pin_A, int _pin_B)
 {
 
   this->pin_1_ = _pin_A;
   this->pin_2_ = _pin_B;
 
+  this->lr_ = _lr;
+
   pinMode(this->pin_1_, OUTPUT);
   pinMode(this->pin_2_, OUTPUT);
+
+  this->setPWM(0);
 }
 
 static double mapf(double val, double in_min, double in_max, double out_min, double out_max) {
@@ -25,11 +27,11 @@ void Motor:: setPWM(int _s)
 
   this->pwm_ = _s;
 
-  //int s = constrain(_s, -this->max_velocity_, this->max_velocity_);
-  int sign =  _s > 0.0 ? 1 : -1;
-  //s = (int)mapf( s, 0, this->max_velocity_, 0, 255);
+   int sign =  _s > 0 ? 1 : -1;
 
-  //  this->bot_linear_vel_right_ = s ;
+  _s = abs(_s);//+100;
+
+   //Serial.print("pwm "); Serial.print(sign); Serial.print(" "); Serial.println(_s);
 
   if(sign == 1)
   {
