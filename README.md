@@ -4,15 +4,38 @@ Perform dead recon (heading and position estimation) based on a pair of Quadratu
 **STATUS**
  - ~~class uml generation~~
  - ~~impliment basic~~
- - SpeedController has perfect PID set and response captured.
+ - [~~SpeedController has perfect PID set and response captured.~~](#Speed-PID-tuning-manual-way)
+ - PositionController PID tuning evaluation
  
 **TODO**
- - PositionController PID tuning evaluation
+ - Code correction for position and speed mode switching
  - Forward and inverse Kinematics
  - ROS + Android + Arduino integration
  - Open for exploration
  - Test cases and Document 
  - End of Dev
+  
+  ___
+  
+  **How to tune PID for position:**
+  Commit: https://github.com/PassionForRobotics/DeadReconQuadratureEncoder/tree/42396479975dbd953a2fa32465e80b0e9517efae/robot
+  
+  ``` c++ 
+  dd.testDist(pos)
+  ```
+  
+  * Set P to get stable oscillation, I and D as zero.
+  * The value of P is Ku
+  * The oscillation cycle time is Tu
+  ![How_to_determine_PID_params](https://raw.githubusercontent.com/PassionForRobotics/DeadReconQuadratureEncoder/42396479975dbd953a2fa32465e80b0e9517efae/robot/img/PID_calcs.png)
+  * Set calculated PID values as per the [sheet](https://github.com/PassionForRobotics/DeadReconQuadratureEncoder/blob/42396479975dbd953a2fa32465e80b0e9517efae/robot/img/ZN_PID_Loop_Tuning.xls) here 300, 2307.7, 9.75
+  * Now keep modifying setpoint to check response
+  ![PID respose](https://raw.githubusercontent.com/PassionForRobotics/DeadReconQuadratureEncoder/42396479975dbd953a2fa32465e80b0e9517efae/robot/img/PosPID_Response.png)
+
+  ___
+ 
+  **Speed PID tuning manual way:**
+  Commit: https://github.com/PassionForRobotics/DeadReconQuadratureEncoder/tree/2f8891bf259f6271e4b6b499b84d00a61de1b476/robot
   
 ``` c++
 /*
