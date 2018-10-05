@@ -25,8 +25,8 @@ void setup()
         pinMode(LED_BUILTIN, OUTPUT);
         digitalWrite(LED_BUILTIN, HIGH);
 
-        dd.testSpeed(100.0);
-        //dd.testDist(60.0);
+        //dd.testSpeed(100.0);
+        dd.testDist(60.0);
 }
 
 void loop()
@@ -34,12 +34,12 @@ void loop()
         // LED toggle
         digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 
-        if(0==(millis()%5000))
-        {
-                dd.testSpeed( g_speed_set_points[g_speed_set_point_index]);
-                g_speed_set_point_index++;
-                g_speed_set_point_index = g_speed_set_point_index % MAX_SPEED_CHANGES;
-        }
+        // if(0==(millis()%5000))
+        // {
+        //         dd.testDist( g_speed_set_points[g_speed_set_point_index]);
+        //         g_speed_set_point_index++;
+        //         g_speed_set_point_index = g_speed_set_point_index % MAX_SPEED_CHANGES;
+        // }
 
         dd.update();
 

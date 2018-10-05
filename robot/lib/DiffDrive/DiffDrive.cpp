@@ -32,20 +32,24 @@ DiffDrive::DiffDrive(float _wheel_radius, float _wheel_base,
         this->position_controller_right_->begin(this->Mr_, this->Qr_,
                                                 this->wheel_radius_);
 
-        this->position_controller_left_->setPositionPID(1.0, 0.0, 0.0);
-        this->position_controller_right_->setPositionPID(1.0, 0.0, 0.0);
+        this->position_controller_left_->setPositionPID(300.0, 2307.7, 10.05);
+        this->position_controller_right_->setPositionPID(300.0, 2307.7, 10.05);
 
         this->position_controller_left_->setSpeedPID(0.0, 11.0, 0.0);
         this->position_controller_right_->setSpeedPID(0.0, 11.0, 0.0);
 
         this->initQuadEncoders();
 
-        g_sCmd.addCommand("setSpeed", this->testSpeed); // setSpeed L 0.0
-        g_sCmd.addCommand("setPID",
-                          this->parseAndSetPIDValues); // setPID L 0.0 0.0 0.0
+        g_sCmd.addCommand("setVel", this->testSpeed); // setSpeed L 0.0
+        g_sCmd.addCommand("setDist", this->testPosition); // setSpeed L 0.0
+        g_sCmd.addCommand("setPositionPID",
+                          this->parseAndSetPositionPIDValues); // setPID L 0.0 0.0 0.0
+        g_sCmd.addCommand("setSpeedPID",
+                          this->parseAndSetSpeedPIDValues); // setPID L 0.0 0.0 0.0
 }
 
-void DiffDrive::testSpeed() {
+void DiffDrive::testSpeed()
+{
         char *arg;
         char c;
         arg = g_sCmd.next();
@@ -73,7 +77,39 @@ void DiffDrive::testSpeed() {
         }
 }
 
-void DiffDrive::parseAndSetPIDValues() {
+void DiffDrive::testPosition()
+{
+        char *arg;
+        char c;
+        arg = g_sCmd.next();
+        if (arg != NULL) {
+                c = arg[0];
+        } else {
+                return;
+                // Serial.println("No arguments");
+        }
+
+        arg = g_sCmd.next();
+        if (arg != NULL) {
+                float s = atof(arg);
+
+                if ('L' == c) {
+                        This->position_controller_left_->testPosition(s);
+                }
+                if ('R' == c) {
+                        This->position_controller_right_->testPosition(s);
+                }
+                // Serial.print("P: ");
+                // Serial.print(p,6);
+        }
+        else
+        {
+                // Serial.println("No arguments");
+        }
+}
+
+void DiffDrive::parseAndSetSpeedPIDValues()
+{
         float p, i, d;
         char *arg;
 
@@ -96,7 +132,7 @@ void DiffDrive::parseAndSetPIDValues() {
         if (arg != NULL) {
                 p = atof(arg); // Converts a char string to an integer
                                // Serial.print("P: ");
-                // Serial.print(p,6);
+                               // Serial.print(p,6);
         } else {
                 // Serial.println("No arguments");
         }
@@ -127,6 +163,61 @@ void DiffDrive::parseAndSetPIDValues() {
         }
 }
 
+void DiffDrive::parseAndSetPositionPIDValues()
+{
+        float p, i, d;
+        char *arg;
+
+        char c;
+        // Serial.println("We're in processCommand");
+
+        arg = g_sCmd.next();
+        if (arg != NULL) {
+                c = arg[0]; // Converts a char string to an integer
+
+                // Serial.print("P: ");
+                // Serial.print(p,6);
+        } else {
+                return;
+                // Serial.println("No arguments");
+        }
+
+        // Serial.println("We're in processCommand");
+        arg = g_sCmd.next();
+        if (arg != NULL) {
+                p = atof(arg); // Converts a char string to an integer
+                               // Serial.print("P: ");
+                               // Serial.print(p,6);
+        } else {
+                // Serial.println("No arguments");
+        }
+
+        arg = g_sCmd.next();
+        if (arg != NULL) {
+                i = atof(arg);
+                // Serial.print(" I: ");
+                // Serial.print(i,6);
+        } else {
+                // Serial.println("No second argument");
+        }
+
+        arg = g_sCmd.next();
+        if (arg != NULL) {
+                d = atof(arg);
+                // Serial.print(" D: ");
+                // Serial.println(d,6);
+        } else {
+                // Serial.println("No second argument");
+        }
+
+        if ('L' == c) {
+                This->position_controller_left_->setPositionPID(p, i, d);
+        }
+        if ('R' == c) {
+                This->position_controller_right_->setPositionPID(p, i, d);
+        }
+}
+
 void DiffDrive::ql_pulseA() {
         This->Ql_->pulseA();
 }
@@ -149,7 +240,7 @@ void DiffDrive::initQuadEncoders() {
 }
 
 void DiffDrive::update() {
-        // this->position_controller_left_->update();
+        this->position_controller_left_->update();
         this->position_controller_right_->update();
         g_sCmd.readSerial();
 }
@@ -162,7 +253,6 @@ void DiffDrive::testDist(float _dist) {
 
 void DiffDrive::testSpeed(float _speed) {
         // Serial.print("dd._speed: ");Serial.println(_speed);
-
         this->position_controller_left_->testSpeed(_speed);
         this->position_controller_right_->testSpeed(_speed);
 }

@@ -109,6 +109,8 @@ float wheel_radius_;
 PID *pid_;
 float pid_output_;
 float pid_setpoint_;
+float last_error_;
+float accumulated_error_;
 volatile unsigned long int last_update_time_;
 
 };
@@ -126,6 +128,7 @@ void setPID (float _P,
 void update ();
 float getRadialDist();
 void calculate();
+void reset();
 void setPIDMode (int mode=0);
 void testSpeed(float _speed);
 private:
@@ -137,6 +140,7 @@ float radial_speed_;
 float last_radial_speed_;
 float radial_acceleration_;
 int lr_;
+
 //  Motor motor_;
 //  QuadEncoder quad_encoder_;
 //  float wheel_diameter_;
@@ -165,6 +169,8 @@ void testPosition(float _dist);
 void testSpeed(float _speed);
 private:
 float radial_dist_;
+bool test_speed_;
+
 int lr_;
 // Motor motor_;
 // QuadEncoder quad_encoder_;
@@ -228,8 +234,9 @@ static void qr_pulseA();
 static void qr_pulseB();
 
 static void testSpeed();
-static void parseAndSetPIDValues();
-
+static void parseAndSetPositionPIDValues();
+static void parseAndSetSpeedPIDValues();
+static void testPosition();
 };
 
 #endif

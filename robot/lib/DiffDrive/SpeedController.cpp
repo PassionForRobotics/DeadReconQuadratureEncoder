@@ -10,7 +10,9 @@ void SpeedController::begin(Motor *_motor, QuadEncoder *_quad_encoder, float _wh
         this->lr_ = this->motor_->getLR();
 
         this->pid_ = new PID((double *)&this->radial_speed_
-                             , (double *)&this->pid_output_, (double *)(&this->pid_setpoint_),0.0,11.0,0.0,P_ON_M, DIRECT);
+                             , (double *)&this->pid_output_
+                             , (double *)(&this->pid_setpoint_)
+                             ,0.0,11.0,0.0,P_ON_M, DIRECT);
         this->pid_->SetSampleTime(UPDATE_TIME/1000.0);
         this->pid_->SetMode(AUTOMATIC);
         this->pid_->SetOutputLimits(-255, 255);
@@ -58,12 +60,13 @@ void SpeedController::update ()
                 //Serial.print((int)this->lr_, HEX);Serial.print(" sc.speed setpoint: ");Serial.println(this->pid_setpoint_);
                 //Serial.print((int)this->lr_, HEX);Serial.print(" sc.speed - setpoint: ");Serial.println(this->radial_speed_ - this->pid_setpoint_);
 
-                Serial.print((int)this->lr_, HEX);
+                //Serial.print((int)this->lr_, HEX);
                 Serial.print(","); Serial.print(this->radial_speed_);
                 Serial.print(","); Serial.print(this->pid_setpoint_);
-                Serial.print(","); Serial.println(this->pid_output_);
+                Serial.print(","); Serial.print(this->pid_output_);
+                //Serial.print(","); Serial.print(this->radial_dist_); // continue printing in position controller
 
-                this->motor_->setPWM(this->pid_output_);
+                //this->motor_->setPWM(this->pid_output_);
 
                 //Serial.print((int)this->lr_, HEX);Serial.print(" PID: ");Serial.print(this->pid_->GetKp(),6);
                 //Serial.print(" ");Serial.print(this->pid_->GetKi(),6);
@@ -85,14 +88,26 @@ void SpeedController::setPID(float _P, float _I, float _D)
 
 void SpeedController::setSpeed(float _speed)
 {
-        this->radial_dist_ = 0;
-        this->last_radial_dist_ = 0;
+        //this->radial_dist_ = 0;
+        //this->last_radial_dist_ = 0;
 
-        float speed = constrain(abs(_speed), 20.0, 150.0);
+        float speed = abs(_speed); //constrain(abs(_speed), 20.0, 150.0);
         int sign =  _speed > 0 ? 1 : -1;
 
         this->pid_setpoint_ = sign*speed;
 
 //  Serial.print((int)this->lr_);Serial.print(" sc._speed: ");Serial.println(_speed);
 
+}
+
+void SpeedController::reset()
+{
+        this->quad_encoder_->reset();
+        this->ticks_ = 0;
+        this->radial_dist_ = 0;
+        this->radial_speed_ = 0;
+        this->radial_acceleration_ = 0;
+        this->last_ticks_ = 0;
+        this->last_radial_dist_ = 0;
+        this->last_radial_speed_ = 0;
 }
