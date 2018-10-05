@@ -34,7 +34,7 @@ Perform dead recon (heading and position estimation) based on a pair of Quadratu
 
   ___
  
-  **Speed PID tuning manual way:**
+  # **Speed PID tuning manual way:**
   Commit: https://github.com/PassionForRobotics/DeadReconQuadratureEncoder/tree/2f8891bf259f6271e4b6b499b84d00a61de1b476/robot
   
 ``` c++
