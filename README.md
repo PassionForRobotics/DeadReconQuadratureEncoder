@@ -5,10 +5,12 @@ Perform dead recon (heading and position estimation) based on a pair of Quadratu
  - ~~class uml generation~~
  - ~~impliment basic~~
  - [~~SpeedController has perfect PID set and response captured.~~](#speed-pid-tuning-manual-way)
- - PositionController PID tuning evaluation
+ - ~~PositionController PID tuning evaluation~~(#how-to-tune-pid-for-position)
+ - ~~Code correction for position and speed mode switching~~
+ - speed unit clarification
  
 **TODO**
- - Code correction for position and speed mode switching
+ - Different pids vs unit evaluation and clarification
  - Forward and inverse Kinematics
  - ROS + Android + Arduino integration
  - Open for exploration
@@ -16,9 +18,58 @@ Perform dead recon (heading and position estimation) based on a pair of Quadratu
  - End of Dev
   
   ___
+# **Unit clarification:**
+  **Commit**: https://github.com/PassionForRobotics/DeadReconQuadratureEncoder/tree/e8dc0748d5ee53b9d5ac5b49f633550fd0cf0256/robot
   
-  **How to tune PID for position:**
-  Commit: https://github.com/PassionForRobotics/DeadReconQuadratureEncoder/tree/42396479975dbd953a2fa32465e80b0e9517efae/robot
+  **Cmd**:
+  
+|CMD|Desc|
+|---|---|
+|setWhlSt L D \n| Do not update left wheel status |
+|setWhlSt R E \n| Keep updating right wheel status  |
+|setVel R 6.28 \n| Set right wheel speed as 6.28; if rad_p_sec unit is configured, wheel take one rev per second  |
+|setDist L 6.28 \n| Set left wheel position at 6.28; if rad unit is configured, wheel will take one rev and stop |
+|setPosPID L 1.0 0.0 0 \n| set left wheel position pid gains as p=1.0, i=0.0 and d=0 (0.0) |
+|setSpdPID R 1.0 0.0 0 \n| set right wheel speed pid gains as p=1.0, i=0.0 and d=0 (0.0) |
+|setCtrlMode S/n| acvtivate speed controller and disable position controller|
+|setCtrlMode P/n| acvtivate position controller and disable soeed controller|
+  
+  **Code**:
+  ``` c++
+  void SpeedController::calculate()
+{
+        this->ticks_ = this->quad_encoder_->getTick();
+        this->delta_ticks_ = this->ticks_ - this->last_ticks_;
+
+        float delta_revolutions = ( (this->delta_ticks_ )) / TICKS_PER_REV; // delta // unit = revolution
+        float delta_angle = delta_revolutions * 360; // delta // unit = degrees
+        float delta_readians = delta_revolutions * 2.0 * PI;  // delta // unit = radians // arc dist
+
+        this->radial_dist_ += delta_readians; // unit = radians
+        this->revolutions_ += delta_revolutions; // unit = revolutions
+        this->linear_dist_ = this->radial_dist_ * RADIUS; // unit = unit of RADIUS (mm)
+
+        this->radial_speed_ = ( (delta_readians)*1000.0*1000.0) / UPDATE_TIME; // rad/seconds
+        this->radial_acceleration_ = ( (this->radial_speed_)*1000.0*1000.0) / UPDATE_TIME; // unit = rad/s/s
+
+        this->rev_speed_ = ((delta_revolutions)*1000.0*1000.0) / UPDATE_TIME; // revolution/seconds
+        this->rev_acceleration_ = ((this->rev_speed_)*1000.0*1000.0) / UPDATE_TIME; // revolution/seconds/seconds
+
+        this->linear_speed_ = this->radial_speed_ * RADIUS; // unit = mm/seconds
+        this->linear_acceleration_ = ( (this->linear_speed_)*1000.0*1000.0) / UPDATE_TIME; // unit = mm/s/s
+
+        // Serial.print((int)this, HEX);Serial.print(" sc.ticks: ");Serial.println(this->ticks_);
+        // //Serial.print("radial_dist: ");Serial.println(this->radial_dist_);
+        // Serial.print((int)this, HEX);Serial.print(" sc.radial_speed: ");Serial.println(this->radial_speed_);
+
+        this->last_ticks_ = this->ticks_; 
+}
+  ```
+
+  ___
+  
+#  **How to tune PID for position:**
+  **Commit**: https://github.com/PassionForRobotics/DeadReconQuadratureEncoder/tree/42396479975dbd953a2fa32465e80b0e9517efae/robot
   
   ``` c++ 
   dd.testDist(pos)
@@ -35,7 +86,7 @@ Perform dead recon (heading and position estimation) based on a pair of Quadratu
   ___
  
   # **Speed PID tuning manual way:**
-  Commit: https://github.com/PassionForRobotics/DeadReconQuadratureEncoder/tree/2f8891bf259f6271e4b6b499b84d00a61de1b476/robot
+  **Commit**: https://github.com/PassionForRobotics/DeadReconQuadratureEncoder/tree/2f8891bf259f6271e4b6b499b84d00a61de1b476/robot
   
 ``` c++
 /*
