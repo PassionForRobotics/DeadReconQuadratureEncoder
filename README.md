@@ -5,7 +5,7 @@ Perform dead recon (heading and position estimation) based on a pair of Quadratu
  - ~~class uml generation~~
  - ~~impliment basic~~
  - [~~SpeedController has perfect PID set and response captured.~~](#speed-pid-tuning-manual-way)
- - ~~PositionController PID tuning evaluation~~(#how-to-tune-pid-for-position)
+ - [~~PositionController PID tuning evaluation~~](#how-to-tune-pid-for-position)
  - ~~Code correction for position and speed mode switching~~
  - speed unit clarification
  
