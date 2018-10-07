@@ -41,15 +41,21 @@
 #define MIN_SPEED (20)
 #define MAX_SPEED (150)
 
-// tested speed pid
-#define PID_SPEED_P (0)
-#define PID_SPEED_I (11.0)
-#define PID_SPEED_D (0)
+// tested speed pid 15.0 120.0 0.2
+#define PID_SPEED_P (15.0) //(0)
+#define PID_SPEED_I (120.0)//(11.0)
+#define PID_SPEED_D (0.2) //(0)
 
 // to test
-#define PID_POSITION_P (1.0)
-#define PID_POSITION_I (0)
-#define PID_POSITION_D (0)
+#define PID_POSITION_P (300.0) //(1.0)
+#define PID_POSITION_I (2307.7) // (0)
+#define PID_POSITION_D (5.75)  //(0)
+
+#define CONTROLLER_SPEED (0)
+#define CONTROLLER_POSITION (1)
+
+#define POSITION_ATTANED_THRESH (0.01)
+#define SPEED_ATTANED_THRESH (2.5)
 
 // typedef for quadrature encoder ISR callbacks
 typedef void (*isr_cb)(void);
@@ -100,7 +106,7 @@ void begin (Motor _motor,
 void setPositionPID (float _P,
                      float _I,
                      float _D);
-void update ();
+void update (int _mode);
 void setPIDMode (int mode=0);
 protected:
 Motor *motor_;
@@ -125,20 +131,48 @@ void setSpeed (float speed);
 void setPID (float _P,
              float _I,
              float _D);
-void update ();
+void update (int _mode);
+float * getPositionPIDIn();
 float getRadialDist();
+float getLinearDist();
+float getRevolutions();
+float getRadialSpeed();
+float getLinearSpeed();
+float getRadialAcceleration();
+float getLinearAcceleration();
 void calculate();
 void reset();
 void setPIDMode (int mode=0);
 void testSpeed(float _speed);
+long int getTicks()
+{
+        return this->ticks_;
+}
+bool hasSpeedAttained()
+{
+        return this->has_speed_attained_;
+}
 private:
+bool  twiddle();
+float * getPIDIn();
 long int ticks_;
 long int last_ticks_;
-float radial_dist_;
-float last_radial_dist_;
-float radial_speed_;
-float last_radial_speed_;
-float radial_acceleration_;
+long int delta_ticks_;
+
+float radial_dist_; // unit = radians
+float linear_dist_; // unit = unit of RADIUS (mm)
+float revolutions_; // unit = revolutions
+
+float radial_speed_; // rad/seconds
+float radial_acceleration_; // unit = rad/s/s
+
+float rev_speed_; // revolution/seconds
+float rev_acceleration_; // revolution/seconds/seconds
+
+float linear_speed_; // unit = mm/seconds
+float linear_acceleration_; // unit = mm/s/s
+
+bool has_speed_attained_;
 int lr_;
 
 //  Motor motor_;
@@ -163,13 +197,22 @@ void setPositionPID (float _P,
 void setSpeedPID (float _P,
                   float _I,
                   float _D);
-void update ();
+bool hasPositionAttained()
+{
+        return this->has_position_attained_;
+}
+bool hasSpeedAttained()
+{
+        return this->speed_controller_->hasSpeedAttained();
+}
+void update (int _mode);
 void setPIDMode (int mode=0);
 void testPosition(float _dist);
+float getPosition();
 void testSpeed(float _speed);
 private:
-float radial_dist_;
-bool test_speed_;
+float position_;
+bool has_position_attained_;
 
 int lr_;
 // Motor motor_;
@@ -215,9 +258,16 @@ void testDist(float _dist);
 void testSpeed(float _speed);
 void update ();
 void drive (float _l, float _r);
+void setControllerMode(int _mode)
+{
+        this->controller_mode_ = _mode;
+}
+bool hasAttained(int _l_or_r, int _sp_or_pos);
 //void drive (float _d, float _a);
 
 private:
+int controller_mode_;
+bool enable_wheel_left_,  enable_wheel_right_;
 Motor * Ml_, *Mr_;
 QuadEncoder * Ql_, *Qr_;
 float wheel_radius_;
@@ -237,6 +287,8 @@ static void testSpeed();
 static void parseAndSetPositionPIDValues();
 static void parseAndSetSpeedPIDValues();
 static void testPosition();
+static void setControllerMode();
+static void setWheelStatus();
 };
 
 #endif

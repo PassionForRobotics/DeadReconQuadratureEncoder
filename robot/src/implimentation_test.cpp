@@ -18,6 +18,7 @@ bool use_variable_speeds = false;
 void setup()
 {
         Serial.begin(115200);
+        dd.setControllerMode(CONTROLLER_SPEED);
         dd.testSpeed(0.0);
         delay(1000);
         Serial.println("[Restart]");
@@ -26,7 +27,10 @@ void setup()
         digitalWrite(LED_BUILTIN, HIGH);
 
         //dd.testSpeed(100.0);
+        dd.setControllerMode(CONTROLLER_POSITION);
         dd.testDist(60.0);
+
+
 }
 
 void loop()
@@ -39,6 +43,18 @@ void loop()
         //         dd.testDist( g_speed_set_points[g_speed_set_point_index]);
         //         g_speed_set_point_index++;
         //         g_speed_set_point_index = g_speed_set_point_index % MAX_SPEED_CHANGES;
+        // }
+
+        // if(dd.hasAttained(RIGHT, CONTROLLER_POSITION))
+        // { // will not allow to tune pid or set any controller mode
+        //         //dd.testDist(-60.0);
+        //         dd.setControllerMode(CONTROLLER_SPEED);
+        //         dd.testSpeed(40.0);
+        // }
+        //
+        // if(dd.hasAttained(RIGHT, CONTROLLER_SPEED))
+        // {
+        //         dd.setControllerMode(CONTROLLER_POSITION);
         // }
 
         dd.update();
